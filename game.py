@@ -5,13 +5,12 @@ import os
 import re
 
 board = np.array(
-    [[1, 0, 0],
-     [0, 2, 0],
-     [0, 0, 1]
+    [[0, 0, 0],
+     [0, 0, 0],
+     [0, 0, 0]
      ]
 )
 turn = 1
-win = 0
 
 
 def clear():
@@ -39,8 +38,24 @@ def printboard():
     print(board_str)
 
 
+def winner():
+    # check horizontals
+    for row in board:
+        if row[0] == row[1] == row[2]:
+            return row[0]
+    # check verticals
+    for col in board.T:
+        if col[0] == col[1] == col[2]:
+            return col[0]
+    # check \ diagonal
+    if board[0][0] == board[1][1] == board[2][2] or board[2][0] == board[1][1] == board[0][2]:
+        return board[1][1]
+    return 0
+
+
 def main():
-    while not(win):
+    global turn
+    while not(win := winner()):
         clear()
         printboard()
         usr_in = input(
@@ -48,7 +63,23 @@ def main():
         if re.match("[lcr][tmb]", usr_in):
             usr_in = usr_in[1] + usr_in[0]
         if re.match("[tmb][lcr]", usr_in):
-            pass
+            rows = {
+                't': 0,
+                'm': 1,
+                'b': 2
+            }
+            cols = {
+                'l': 0,
+                'c': 1,
+                'r': 2
+            }
+            row = rows[usr_in[0]]
+            col = cols[usr_in[1]]
+            if board[row][col] == 0:
+                board[row][col] = turn
+                turn = 2 if turn == 1 else 1
+            else:
+                pass
         else:
             pass
 
