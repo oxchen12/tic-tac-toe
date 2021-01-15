@@ -5,9 +5,9 @@ import os
 import re
 
 board = np.array(
-    [[0, 0, 0],
-     [0, 0, 0],
-     [0, 0, 0]
+    [[1, 0, 0],
+     [0, 2, 0],
+     [0, 0, 1]
      ]
 )
 turn = 1
@@ -31,7 +31,7 @@ def printboard():
             board_str += "| "
             if row[i] == 1:
                 board_str += "X "
-            elif row[i] == -1:
+            elif row[i] == 2:
                 board_str += "O "
             else:
                 board_str += "  "
