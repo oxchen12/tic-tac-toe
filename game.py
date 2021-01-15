@@ -1,5 +1,3 @@
-from pyfiglet import Figlet
-
 import numpy as np
 import os
 import re
@@ -21,7 +19,7 @@ def clear():
 
 
 def printtitle():
-    print(Figlet(font="slant").renderText("Tic Tac Toe"))
+    print('  _______         ______              ______         \n /_  __(_)____   /_  __/___ ______   /_  __/___  ___ \n  / / / / ___/    / / / __ `/ ___/    / / / __ \\/ _ \\\n / / / / /__     / / / /_/ / /__     / / / /_/ /  __/\n/_/ /_/\\___/    /_/  \\__,_/\\___/    /_/  \\____/\\___/ \n                                                     \n')
 
 
 def printboard():
@@ -53,10 +51,7 @@ def winner():
     # check \ diagonal
     if (board[0][0] == board[1][1] == board[2][2] or board[2][0] == board[1][1] == board[0][2]) and board[1][1] != 0:
         return board[1][1]
-    for row in board:
-        if 0 in board:
-            return 0
-    return -1  # draw
+    return 0 if 0 in board else -1
 
 
 def main():
