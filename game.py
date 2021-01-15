@@ -140,6 +140,8 @@ def main():
                 # 8. Empty side: The player plays in a middle square on any of the 4 sides.
                 turn = 1
             time.sleep(2)
+    print_title()
+    print_board()
     if win > 0:
         print(f"{' XO'[win]} wins!")
     else:
