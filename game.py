@@ -14,6 +14,7 @@ win = 0
 
 
 def print_title():
+    """Clears the terminal screen and prints the stylied title."""
     if os.name == "nt":
         os.system("cls")
     else:
@@ -22,22 +23,22 @@ def print_title():
 
 
 def print_board():
+    """Prints the current state of the board using X's and O's."""
     print_title()
     board_str = "+---+---+---+\n"
     for row in board:
         for i in range(3):
-            board_str += "| "
-            if row[i] == 1:
-                board_str += "X "
-            elif row[i] == 2:
-                board_str += "O "
-            else:
-                board_str += "  "
+            board_str += f"| {' XO'[row[i]]} "
         board_str += "|\n+---+---+---+\n"
     print(board_str)
 
 
 def check_win():
+    """Checks the board for a winning state.
+
+    Returns:
+        An int describing the state of the board. A return value of 1 or 2 indicates a win for the corresponding player; -1 indicates a draw; 0 indicates no win or draw.
+    """
     for i in range(3):
         row = board[i]
         col = board[:, i]
@@ -56,6 +57,14 @@ def check_win():
 
 def potential_win(board):
     # print(board)
+    """Checks the board for a potential win on the next turn first for the AI and then for the player.
+
+    Args:
+        board (numpy.array): A 3x3 numpy array containing the board data.
+
+    Returns:
+        A list containing the board index corresponding to the ideal move for the AI to either win or block the player's win. Returns [-1, -1] if no such move exists.
+    """
     for p in (2, 1):
         for i in range(3):
             row = board[i]
@@ -99,7 +108,6 @@ def main():
     while not(win := check_win()):
         print_board()
         if turn == 1 or mode == 3:
-            # TODO: change controls to 1-9
             # usr_in = input(
             #     f"{' XO'[turn]}, enter row (t/m/b) and column (l/c/r) with no spaces\n> ").lower().strip()
             # if re.match("[lcr][tmb]", usr_in):
@@ -130,9 +138,8 @@ def main():
                         board[row][col] = turn
                         turn = 2 if turn == 1 else 1
             except ValueError:
-                print("Invalid entry")
+                print("Invalid move")
                 time.sleep(2)
-
         else:
             print("O (AI) is thinking...")
             if mode == 1:
