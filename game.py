@@ -107,16 +107,13 @@ def pot_fork(brd):
         A tuple containing a 2d array index corresponding to the ideal move for the AI to either create a fork for itself or block the player's fork. Returns an empty tuple if no such move exists.
     """
     for p in (2, 1):
-        win_in_two = []
         for i in range(3):
             for j in range(3):
                 test_board = brd.copy()
                 if test_board[i, j] == 0:
                     test_board[i, j] = p
-                    if pot_win(test_board, p_range=[p]) != []:
-                        win_in_two.append((i, j))
-        if len(win_in_two) >= 2:
-            return win_in_two[0]
+                    if len(pot_win(test_board, p_range=[p])) >= 2:
+                        return (i, j)
     return ()
 
 
@@ -137,7 +134,7 @@ def pot_corner(brd):
     if empty_corners:
         # check for opposite corner
         for e in empty_corners:
-            if corners[corners.index(e) - 2] == 1:
+            if board[corners[corners.index(e) - 2]] == 1:
                 return e
         # check for empty corner
         return empty_corners[0]
@@ -202,7 +199,7 @@ def main():
                         if board[s] == 0:
                             board[s] = 2
                 turn = 1
-            time.sleep(1)
+            time.sleep(0.5)
     print_title()
     print_board()
     if win > 0:
