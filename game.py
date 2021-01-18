@@ -67,29 +67,33 @@ def pot_win(brd, p_range=[2, 1]):
     Returns:
         A set of tuples, each of which is a 2d array index for a win solution.
     """
-    solutions = set()
+    pot_solutions = set()
     for p in p_range:
         for i in range(3):
             row = brd[i]
             col = brd[:, i]
             for j in range(3):
                 # check for horizontal
-                if (row[j] == row[j-1]) and (row[j] == p):
-                    solutions.append((i, j+1 % 3))
+                if (row[j] == row[j-1]) and (row[j] == p) and (col[j] != 0):
+                    pot_solutions.add((i, (j+1) % 3))
                 # check for vertical
-                if (col[j] == col[j-1]) and (col[j] == p):
-                    solutions.append((j+1 % 3, i))
+                if (col[j] == col[j-1]) and (col[j] == p) and (col[j] != 0):
+                    pot_solutions.add(((j+1) % 3, i))
         for i in range(3):
             # check for \ diagonal
-            if (brd[i, i] == brd[i-1, i-1]) and (brd[i, i] == p):
-                solutions.append((i+1 % 3, i+1 % 3))
+            if (brd[i, i] == brd[i-1, i-1]) and (brd[i, i] == p) and (brd[i, i] != 0):
+                pot_solutions.add(((i+1) % 3, (i+1) % 3))
             # check for / diagonal
-            if (brd[0, 2] == brd[2, 0]) and (brd[0, 2] == p):
-                solutions.append((1, 1))
-            elif (brd[1, 1] == brd[0, 2]) and (brd[1, 1] == p):
-                solutions.append((2, 0))
-            elif (brd[1, 1] == brd[2, 0]) and (brd[1, 1] == p):
-                solutions.append((0, 2))
+            if (brd[0, 2] == brd[2, 0]) and (brd[0, 2] == p) and (brd[0, 2] != 0):
+                pot_solutions.add((1, 1))
+            elif (brd[1, 1] == brd[0, 2]) and (brd[1, 1] == p) and (brd[1, 1] != 0):
+                pot_solutions.add((2, 0))
+            elif (brd[1, 1] == brd[2, 0]) and (brd[1, 1] == p) and (brd[1, 1] != 0):
+                pot_solutions.add((0, 2))
+    solutions = set()
+    for s in pot_solutions:
+        if board[s] == 0:
+            solutions.add(s)
     return solutions
 
 
@@ -179,12 +183,8 @@ def main():
                 pw = tuple(pot_win(board))
                 pf = tuple(pot_fork(board))
                 pc = tuple(pot_corner(board))
-                # TODO: ensure that the AI actually makes a move
                 if pw:
-                    for s in pw:
-                        if board[s] != 0:
-                            board[s] = 2
-                            break
+                    board[pw[0]] = 2
                 # 3. Fork: Create an opportunity where the player has two ways to win (two non-blocked lines of 2).
                 # 4. Blocking an opponent's fork: If there is only one possible fork for the opponent, the player should block it. Otherwise, the player should block all forks in any way that simultaneously allows them to create two in a row. Otherwise, the player should create a two in a row to force the opponent into defending, as long as it doesn't result in them creating a fork. For example, if "X" has two opposite corners and "O" has the center, "O" must not play a corner move in order to win. (Playing a corner move in this scenario creates a fork for "X" to win.)
                 elif pf:
