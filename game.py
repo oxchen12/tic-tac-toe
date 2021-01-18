@@ -204,7 +204,7 @@ def main():
             pc = pot_corner(board)
             ps = pot_side(board)
             if mode == 1:
-                board[rand_move] = 2
+                board[rand_move(board)] = 2
             else:
                 if pw:
                     board[pw.pop()] = 2
@@ -217,7 +217,7 @@ def main():
                 elif ps:
                     board[ps] = 2
                 else:
-                    board[rand_move] = 2
+                    board[rand_move(board)] = 2
             turn = 1
             time.sleep(0.5)
     print_title()
