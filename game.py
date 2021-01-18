@@ -38,79 +38,101 @@ def print_board():
 
 
 def check_win():
-    # check horizontals
-    for row in board:
-        if row[0] == row[1] == row[2] and row[0] != 0:
-            return row[0]
-    # check verticals
-    for col in board.T:
-        if col[0] == col[1] == col[2] and col[0] != 0:
-            return col[0]
-    # check \ diagonal
-    if (board[0][0] == board[1][1] == board[2][2] or board[2][0] == board[1][1] == board[0][2]) and board[1][1] != 0:
-        return board[1][1]
-    return 0 if 0 in board else -1
-
-
-def potential_win():
     for i in range(3):
         row = board[i]
         col = board[:, i]
-        for j in range(3):
-            # check for horizontal
-            if row[j] == row[j-1] != 0:
-                return [i, j+1 if j != 2 else 0]
-            # check for vertical
-            if col[j] == col[j-1] != 0:
-                return [j+1 if j != 2 else 0, i]
-    for i in range(3):
-        # check for \ diagonal
-        if board[i][i] == board[i-1][i-1] != 0:
-            pos = i+1 if i != 2 else 0
-            return [pos, pos]
-        # check for / diagonal
-        if board[0][2] == board[2][0] != 0:
-            return [1, 1]
-        elif board[1][1] == board[0][2] != 0:
-            return [2, 0]
-        elif board[1][1] == board[2][0] != 0:
-            return [0, 2]
+        # check horizontals
+        if row[0] == row[1] == row[2] and row[0] != 0:
+            return row[0]
+        # check verticals
+        if col[0] == col[1] == col[2] and col[0] != 0:
+            return col[0]
+    # check diagonals
+    if (board[0][0] == board[1][1] == board[2][2] or board[2][0] == board[1][1] == board[0][2]) and board[1][1] != 0:
+        return board[1][1]
+    # if the board is filled, the result is a draw
+    return 0 if 0 in board else -1
+
+
+def potential_win(board):
+    # print(board)
+    for p in (2, 1):
+        for i in range(3):
+            row = board[i]
+            col = board[:, i]
+            for j in range(3):
+                # check for horizontal
+                if row[j] == row[j-1] == p != 0:
+                    return [i, j+1 if j != 2 else 0]
+                # check for vertical
+                if col[j] == col[j-1] == p != 0:
+                    return [j+1 if j != 2 else 0, i]
+        for i in range(3):
+            # check for \ diagonal
+            if board[i][i] == board[i-1][i-1] == p != 0:
+                pos = i+1 if i != 2 else 0
+                return [pos, pos]
+            # check for / diagonal
+            if board[0][2] == board[2][0] == p != 0:
+                return [1, 1]
+            elif board[1][1] == board[0][2] == p != 0:
+                return [2, 0]
+            elif board[1][1] == board[2][0] == p != 0:
+                return [0, 2]
+    return [-1, -1]
+
+
+def potential_fork(board):
     return [-1, -1]
 
 
 def main():
     mode = 0
-    print_title()
     while not(mode in (1, 2, 3)):
+        print_title()
         try:
             mode = int(input(
                 "Choose a mode to play\n1. Player vs. AI (easy)\n2. Player vs. AI (unbeatable)\n3. Player vs. Player\n\n> "))
-        except ValueError as e:
-            input("Please enter 1/2/3")
+        except ValueError:
+            input("Please enter 1/2/3/4")
     turn = 1
     while not(win := check_win()):
         print_board()
-        if turn == 1:
-            usr_in = input(
-                f"{' XO'[turn]}, enter row (t/m/b) and column (l/c/r) with no spaces\n> ").lower().strip()
-            if re.match("[lcr][tmb]", usr_in):
-                usr_in = usr_in[1] + usr_in[0]
-            if re.match("[tmb][lcr]", usr_in):
-                rows = {
-                    't': 0,
-                    'm': 1,
-                    'b': 2
-                }
-                cols = {
-                    'l': 0,
-                    'c': 1,
-                    'r': 2
-                }
-                row = rows[usr_in[0]]
-                col = cols[usr_in[1]]
-                if board[row][col] == 0:
-                    board[row][col] = turn
-                    turn = 2 if turn == 1 else 1
+        if turn == 1 or mode == 3:
+            # TODO: change controls to 1-9
+            # usr_in = input(
+            #     f"{' XO'[turn]}, enter row (t/m/b) and column (l/c/r) with no spaces\n> ").lower().strip()
+            # if re.match("[lcr][tmb]", usr_in):
+            #     usr_in = usr_in[1] + usr_in[0]
+            # if re.match("[tmb][lcr]", usr_in):
+            #     rows = {
+            #         't': 0,
+            #         'm': 1,
+            #         'b': 2
+            #     }
+            #     cols = {
+            #         'l': 0,
+            #         'c': 1,
+            #         'r': 2
+            #     }
+            #     row = rows[usr_in[0]]
+            #     col = cols[usr_in[1]]
+            #     if board[row][col] == 0:
+            #         board[row][col] = turn
+            #         turn = 2 if turn == 1 else 1
+            try:
+                usr_in = int(
+                    input(f"{' XO'[turn]}, enter 1-9 to move\n\n> ")) - 1
+                if 0 <= usr_in < 9:
+                    row = int(usr_in / 3)
+                    col = usr_in % 3
+                    if board[row][col] == 0:
+                        board[row][col] = turn
+                        turn = 2 if turn == 1 else 1
+            except ValueError:
+                print("Invalid entry")
+                time.sleep(2)
+
         else:
             print("O (AI) is thinking...")
             if mode == 1:
@@ -122,22 +144,31 @@ def main():
             else:
                 # 1. Win: If the player has two in a row, they can place a third to get three in a row.
                 # 2. Block: If the opponent has two in a row, the player must play the third themselves to block the opponent.
-                pot_win = potential_win()
+                pot_win = potential_win(board)
+                pot_fork = potential_fork(board)
                 if pot_win != [-1, -1]:
                     board[pot_win[0]][pot_win[1]] = 2
                 # 3. Fork: Create an opportunity where the player has two ways to win (two non-blocked lines of 2).
                 # 4. Blocking an opponent's fork: If there is only one possible fork for the opponent, the player should block it. Otherwise, the player should block all forks in any way that simultaneously allows them to create two in a row. Otherwise, the player should create a two in a row to force the opponent into defending, as long as it doesn't result in them creating a fork. For example, if "X" has two opposite corners and "O" has the center, "O" must not play a corner move in order to win. (Playing a corner move in this scenario creates a fork for "X" to win.)
-                # elif potential_fork() != [-1, -1]:
-                #     pass
+                elif pot_fork != [-1, -1]:
+                    board[pot_fork[0]][pot_fork[1]] = 2
                 # 5. Center: A player marks the center. (If it is the first move of the game, playing a corner move gives the second player more opportunities to make a mistake and may therefore be the better choice; however, it makes no difference between perfect players.)
                 elif board[1][1] == 0:
                     board[1][1] = 2
                 # 6. Opposite corner: If the opponent is in the corner, the player plays the opposite corner.
-                # elif opposite_corner():
-                #     pass
                 # 7. Empty corner: The player plays in a corner square.
-
+                elif not(board[0][0] and board[0][2] and board[2][0] and board[2][2]):
+                    pass
                 # 8. Empty side: The player plays in a middle square on any of the 4 sides.
+                else:
+                    if board[0][1] == 0:
+                        board[0][1] = 2
+                    elif board[1][0] == 0:
+                        board[1][0] = 2
+                    elif board[1][2] == 0:
+                        board[1][2] = 2
+                    else:
+                        board[2][1] = 2
                 turn = 1
             time.sleep(2)
     print_title()
