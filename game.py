@@ -1,7 +1,6 @@
 import numpy as np
 import os
 import random
-import re
 import time
 
 board = np.array(
@@ -33,15 +32,18 @@ def print_board():
     print(board_str)
 
 
-def check_win():
+def check_win(brd, all=False):
     """Checks the board for a winning state.
+
+    Args:
+        brd (numpy.array): A 3x3 numpy array containing the board data.
 
     Returns:
         An int describing the state of the board. A return value of 1 or 2 indicates a win for the corresponding player; -1 indicates a draw; 0 indicates no win or draw.
     """
     for i in range(3):
-        row = board[i]
-        col = board[:, i]
+        row = brd[i]
+        col = brd[:, i]
         # check horizontals
         if row[0] == row[1] == row[2] and row[0] != 0:
             return row[0]
@@ -49,50 +51,71 @@ def check_win():
         if col[0] == col[1] == col[2] and col[0] != 0:
             return col[0]
     # check diagonals
-    if (board[0][0] == board[1][1] == board[2][2] or board[2][0] == board[1][1] == board[0][2]) and board[1][1] != 0:
-        return board[1][1]
-    # if the board is filled, the result is a draw
-    return 0 if 0 in board else -1
+    if (brd[0][0] == brd[1][1] == brd[2][2] or brd[2][0] == brd[1][1] == brd[0][2]) and brd[1][1] != 0:
+        return brd[1][1]
+    # if the brd is filled, the result is a draw
+    return 0 if 0 in brd else -1
 
 
-def potential_win(board):
-    # print(board)
-    """Checks the board for a potential win on the next turn first for the AI and then for the player.
+def potential_win(brd, p_range=[2, 1], all=False):
+    """Checks the board for a potential win on the next turn. 
+
+    Args:
+        brd (numpy.array): A 3x3 numpy array containing the board data.
+        p_range (list, optional): The range and order of corresponding players to check over. Defaults to [2, 1].
+        all (bool, optional): Whether to return all solutions or just one. Defaults to False.
+
+    Returns:
+        [type]: [description]
+    """
+    solutions = []
+    for p in p_range:
+        for i in range(3):
+            row = brd[i]
+            col = brd[:, i]
+            for j in range(3):
+                # check for horizontal
+                if row[j] == row[j-1] == p != 0:
+                    solutions.append([i, j+1 if j != 2 else 0])
+                # check for vertical
+                if col[j] == col[j-1] == p != 0:
+                    solutions.append([j+1 if j != 2 else 0, i])
+        for i in range(3):
+            # check for \ diagonal
+            if brd[i][i] == brd[i-1][i-1] == p != 0:
+                pos = i+1 if i != 2 else 0
+                solutions.append([pos, pos])
+            # check for / diagonal
+            if brd[0][2] == brd[2][0] == p != 0:
+                solutions.append([1, 1])
+            elif brd[1][1] == brd[0][2] == p != 0:
+                solutions.append([2, 0])
+            elif brd[1][1] == brd[2][0] == p != 0:
+                solutions.append([0, 2])
+    return solutions if all else solutions[0]
+
+
+def potential_fork(brd):
+    """Checks the board for a potential fork on the next turn first for the AI and then for the player.
 
     Args:
         board (numpy.array): A 3x3 numpy array containing the board data.
 
     Returns:
-        A list containing the board index corresponding to the ideal move for the AI to either win or block the player's win. Returns [-1, -1] if no such move exists.
+        A list containing the board index corresponding to the ideal move for the AI to either create a fork for itself or block the player's fork. Returns an empty list if no such move exists.
     """
     for p in (2, 1):
+        win_in_two = []
         for i in range(3):
-            row = board[i]
-            col = board[:, i]
             for j in range(3):
-                # check for horizontal
-                if row[j] == row[j-1] == p != 0:
-                    return [i, j+1 if j != 2 else 0]
-                # check for vertical
-                if col[j] == col[j-1] == p != 0:
-                    return [j+1 if j != 2 else 0, i]
-        for i in range(3):
-            # check for \ diagonal
-            if board[i][i] == board[i-1][i-1] == p != 0:
-                pos = i+1 if i != 2 else 0
-                return [pos, pos]
-            # check for / diagonal
-            if board[0][2] == board[2][0] == p != 0:
-                return [1, 1]
-            elif board[1][1] == board[0][2] == p != 0:
-                return [2, 0]
-            elif board[1][1] == board[2][0] == p != 0:
-                return [0, 2]
-    return [-1, -1]
-
-
-def potential_fork(board):
-    return [-1, -1]
+                test_board = brd.copy()
+                if test_board[i][j] == 0:
+                    test_board[i][j] = p
+                    if potential_win(test_board, p_range=[p], all=True) != []:
+                        win_in_two.append([i, j])
+        if len(win_in_two) >= 2:
+            return win_in_two[0]
+    return []
 
 
 def main():
@@ -153,11 +176,11 @@ def main():
                 # 2. Block: If the opponent has two in a row, the player must play the third themselves to block the opponent.
                 pot_win = potential_win(board)
                 pot_fork = potential_fork(board)
-                if pot_win != [-1, -1]:
+                if pot_win:
                     board[pot_win[0]][pot_win[1]] = 2
                 # 3. Fork: Create an opportunity where the player has two ways to win (two non-blocked lines of 2).
                 # 4. Blocking an opponent's fork: If there is only one possible fork for the opponent, the player should block it. Otherwise, the player should block all forks in any way that simultaneously allows them to create two in a row. Otherwise, the player should create a two in a row to force the opponent into defending, as long as it doesn't result in them creating a fork. For example, if "X" has two opposite corners and "O" has the center, "O" must not play a corner move in order to win. (Playing a corner move in this scenario creates a fork for "X" to win.)
-                elif pot_fork != [-1, -1]:
+                elif pot_fork:
                     board[pot_fork[0]][pot_fork[1]] = 2
                 # 5. Center: A player marks the center. (If it is the first move of the game, playing a corner move gives the second player more opportunities to make a mistake and may therefore be the better choice; however, it makes no difference between perfect players.)
                 elif board[1][1] == 0:
