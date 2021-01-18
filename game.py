@@ -29,6 +29,15 @@ def print_board():
         for i in range(3):
             board_str += f"| {' XO'[row[i]]} "
         board_str += "|\n+---+---+---+\n"
+        # +----------------------+-------------------------+
+        # | ^ left-aligned board | \/ center-aligned board |
+        # +----------------------+-------------------------+
+        # row_str = ""
+        # for i in range(3):
+        #     row_str += f"| {' XO'[row[i]]} "
+        # row_str += "|"
+        # board_str += row_str.center(53) + "\n" + \
+        #     "+---+---+---+".center(53) + "\n"
     print(board_str)
 
 
@@ -198,7 +207,7 @@ def main():
                 board[rand_move] = 2
             else:
                 if pw:
-                    board[pw[0]] = 2
+                    board[pw.pop()] = 2
                 elif pf and mode == 4:
                     board[pf] = 2
                 elif board[1, 1] == 0:
