@@ -48,21 +48,23 @@ def check_win(brd):
         brd (numpy.array): A 3x3 numpy array containing the board data.
 
     Returns:
-        An int describing the state of the board. A return value of 1 or 2 indicates a win for the corresponding player; -1 indicates a draw; 0 indicates no win or draw.
+        An int describing the state of the board. A return value of 1 or 2 
+        indicates a win for the corresponding player; -1 indicates a draw; 0 
+        indicates no win or draw.
     """
     for i in range(3):
         row = brd[i]
         col = brd[:, i]
         # check horizontals
-        if row[0] == row[1] == row[2] and row[0] != 0:
+        if not(sum(row) % 3) and row[0]:
             return row[0]
         # check verticals
-        if col[0] == col[1] == col[2] and col[0] != 0:
+        if not(sum(col) % 3) and col[0]:
             return col[0]
     # check diagonals
-    if (brd[0, 0] == brd[1, 1] == brd[2, 2] or brd[2, 0] == brd[1, 1] == brd[0, 2]) and brd[1, 1] != 0:
+    if (brd[0, 0] == brd[1, 1] == brd[2, 2] or brd[2, 0] == brd[1, 1] == brd[0, 2]) and brd[1, 1]:
         return brd[1, 1]
-    # if the brd is filled, the result is a draw
+    # if the board is filled, the result is a draw
     return 0 if 0 in brd else -1
 
 
@@ -71,7 +73,8 @@ def pot_win(brd, p_range=[2, 1]):
 
     Args:
         brd (numpy.array): A 3x3 numpy array containing the board data.
-        p_range (list, optional): The range and order of corresponding players to check over. Defaults to [2, 1].
+        p_range (list, optional): The range and order of corresponding players 
+        to check over. Defaults to [2, 1].
 
     Returns:
         A set of tuples, each of which is a 2d array index for a win solution.
@@ -83,22 +86,21 @@ def pot_win(brd, p_range=[2, 1]):
             col = brd[:, i]
             for j in range(3):
                 # check for horizontal
-                if (row[j] == row[j-1]) and (row[j] == p) and (col[j] != 0):
+                if (row[j] == row[j-1]) and (row[j] == p):
                     pot_solutions.add((i, (j+1) % 3))
                 # check for vertical
-                if (col[j] == col[j-1]) and (col[j] == p) and (col[j] != 0):
+                if (col[j] == col[j-1]) and (col[j] == p):
                     pot_solutions.add(((j+1) % 3, i))
-        for i in range(3):
             # check for \ diagonal
-            if (brd[i, i] == brd[i-1, i-1]) and (brd[i, i] == p) and (brd[i, i] != 0):
+            if (brd[i, i] == brd[i-1, i-1]) and (brd[i, i] == p):
                 pot_solutions.add(((i+1) % 3, (i+1) % 3))
-            # check for / diagonal
-            if (brd[0, 2] == brd[2, 0]) and (brd[0, 2] == p) and (brd[0, 2] != 0):
-                pot_solutions.add((1, 1))
-            elif (brd[1, 1] == brd[0, 2]) and (brd[1, 1] == p) and (brd[1, 1] != 0):
-                pot_solutions.add((2, 0))
-            elif (brd[1, 1] == brd[2, 0]) and (brd[1, 1] == p) and (brd[1, 1] != 0):
-                pot_solutions.add((0, 2))
+        # check for / diagonal
+        if (brd[0, 2] == brd[2, 0]) and (brd[0, 2] == p):
+            pot_solutions.add((1, 1))
+        elif (brd[1, 1] == brd[0, 2]) and (brd[1, 1] == p):
+            pot_solutions.add((2, 0))
+        elif (brd[1, 1] == brd[2, 0]) and (brd[1, 1] == p):
+            pot_solutions.add((0, 2))
     solutions = set()
     for s in pot_solutions:
         if board[s] == 0:
@@ -113,14 +115,19 @@ def pot_fork(brd):
         board (numpy.array): A 3x3 numpy array containing the board data.
 
     Returns:
-        A tuple containing a 2d array index corresponding to the ideal move for the AI to either create a fork for itself or block the player's fork. Returns an empty tuple if no such move exists.
+        A tuple containing a 2d array index corresponding to the ideal move for 
+        the AI to either create a fork for itself or block the player's fork. 
+        Returns an empty tuple if no such move exists.
     """
     for p in (2, 1):
         for i in range(3):
             for j in range(3):
                 test_board = brd.copy()
                 if test_board[i, j] == 0:
-                    test_board[i, j] = p
+                    # Because the AI moves second, it only places a temporary
+                    # "O", not a temporary "X"
+                    if p == 2:
+                        test_board[i, j] = 2
                     if len(pot_win(test_board, p_range=[p])) >= 2:
                         return (i, j)
     return ()
@@ -133,7 +140,9 @@ def pot_corner(brd):
         brd (numpy.array): A 3x3 numpy array containing the board data.
 
     Returns:
-        A tuple containing a 2d array index corresponding to the selected corner for the AI to move to. Returns an empty tuple if no such move exists.
+        A tuple containing a 2d array index corresponding to the selected 
+        corner for the AI to move to. Returns an empty tuple if no such move 
+        exists.
     """
     corners = ((0, 0), (0, 2), (2, 2), (2, 0))
     empty_corners = []
@@ -157,7 +166,8 @@ def pot_side(brd):
         brd (numpy.array): A 3x3 numpy array containing the board data.
 
     Returns:
-        A tuple containing a 2d array index corresponding to the selected side to move into. Returns an empty tuple if no such move exists.
+        A tuple containing a 2d array index corresponding to the selected side 
+        to move into. Returns an empty tuple if no such move exists.
     """
     for s in ((0, 1), (1, 0), (1, 2), (2, 1)):
         if brd[s] == 0:
@@ -212,7 +222,7 @@ def main():
                     board[pf] = 2
                 elif board[1, 1] == 0:
                     board[1, 1] = 2
-                elif pc and mode == 3:
+                elif pc and mode >= 3:
                     board[pc] = 2
                 elif ps:
                     board[ps] = 2
