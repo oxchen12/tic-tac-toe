@@ -118,13 +118,13 @@ def pot_fork(brd):
 
 
 def pot_corner(brd):
-    """Checks the board for a corner to move into, checking for opposite corners and then defaulting to any empty corner.
+    """Checks the board for an empty corner to move into, checking for opposite corners and then defaulting to any empty corner.
 
     Args:
         brd (numpy.array): A 3x3 numpy array containing the board data.
 
     Returns:
-        A tuple containg a 2d array index corresponding to the selected corner for the AI to move to. Returns an empty tuple if no such move exists.
+        A tuple containing a 2d array index corresponding to the selected corner for the AI to move to. Returns an empty tuple if no such move exists.
     """
     corners = ((0, 0), (0, 2), (2, 2), (2, 0))
     empty_corners = []
@@ -141,19 +141,41 @@ def pot_corner(brd):
     return ()
 
 
+def pot_side(brd):
+    """Checks the board for an empty side to move into.
+
+    Args:
+        brd (numpy.array): A 3x3 numpy array containing the board data.
+
+    Returns:
+        A tuple containing a 2d array index corresponding to the selected side to move into. Returns an empty tuple if no such move exists.
+    """
+    for s in ((0, 1), (1, 0), (1, 2), (2, 1)):
+        if brd[s] == 0:
+            return s
+    return ()
+
+
+def rand_move(brd):
+    while True:
+        ai_row, ai_col = random.randint(0, 2), random.randint(0, 2)
+        if brd[ai_row, ai_col] == 0:
+            return (ai_row, ai_col)
+
+
 def main():
     mode = 0
     while not(mode in (1, 2, 3, 4)):
         print_title()
         try:
             mode = int(input(
-                "Choose a mode to play\n1. Player vs. AI (easy)\n2. Player vs. AI (Hard)\n3. Player vs. AI (unbeatable)\n4. Player vs. Player\n\n> "))
+                "Choose a mode to play\n1. Player vs. AI (easy)\n2. Player vs. AI (medium)\n3. Player vs. AI (hard)\n4. Player vs. AI (insane) \n5. Player vs. Player\n\n> "))
         except ValueError:
             input("Please enter 1/2/3/4")
     turn = 1
     while not(win := check_win(board)):
         print_board()
-        if turn == 1 or mode == 4:
+        if turn == 1 or mode == 5:
             try:
                 usr_in = int(
                     input(f"{' XO'[turn]}, enter 1-9 to move\n\n> ")) - 1
@@ -168,37 +190,26 @@ def main():
                 time.sleep(2)
         else:
             print("O (AI) is thinking...")
+            pw = pot_win(board)
+            pf = pot_fork(board)
+            pc = pot_corner(board)
+            ps = pot_side(board)
             if mode == 1:
-                while turn == 2:
-                    ai_row, ai_col = random.randint(0, 2), random.randint(0, 2)
-                    if board[ai_row, ai_col] == 0:
-                        board[ai_row, ai_col] = 2
-                        turn = 1
+                board[rand_move] = 2
             else:
-                # 1. Win: If the player has two in a row, they can place a third to get three in a row.
-                # 2. Block: If the opponent has two in a row, the player must play the third themselves to block the opponent.
-                pw = tuple(pot_win(board))
-                pf = tuple(pot_fork(board))
-                pc = tuple(pot_corner(board))
                 if pw:
                     board[pw[0]] = 2
-                # 3. Fork: Create an opportunity where the player has two ways to win (two non-blocked lines of 2).
-                # 4. Blocking an opponent's fork: If there is only one possible fork for the opponent, the player should block it. Otherwise, the player should block all forks in any way that simultaneously allows them to create two in a row. Otherwise, the player should create a two in a row to force the opponent into defending, as long as it doesn't result in them creating a fork. For example, if "X" has two opposite corners and "O" has the center, "O" must not play a corner move in order to win. (Playing a corner move in this scenario creates a fork for "X" to win.)
-                elif pf:
+                elif pf and mode == 4:
                     board[pf] = 2
-                # 5. Center: A player marks the center. (If it is the first move of the game, playing a corner move gives the second player more opportunities to make a mistake and may therefore be the better choice; however, it makes no difference between perfect players.)
                 elif board[1, 1] == 0:
                     board[1, 1] = 2
-                # 6. Opposite corner: If the opponent is in the corner, the player plays the opposite corner
-                # 7. Empty corner: The player plays in a corner square.
-                elif pc:
+                elif pc and mode == 3:
                     board[pc] = 2
-                # 8. Empty side: The player plays in a middle square on any of the 4 sides.
+                elif ps:
+                    board[ps] = 2
                 else:
-                    for s in ((0, 1), (1, 0), (1, 2), (2, 1)):
-                        if board[s] == 0:
-                            board[s] = 2
-                turn = 1
+                    board[rand_move] = 2
+            turn = 1
             time.sleep(0.5)
     print_title()
     print_board()
