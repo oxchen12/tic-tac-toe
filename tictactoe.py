@@ -2,14 +2,6 @@ import numpy as np
 import os
 import time
 
-board = np.array(
-    [[0, 0, 0],
-     [0, 0, 0],
-     [0, 0, 0]
-     ]
-)
-win = 0
-
 
 def print_title():
     """Clears the terminal screen and prints the stylized title."""
@@ -20,14 +12,18 @@ def print_title():
     print('  _______         ______              ______         \n /_  __(_)____   /_  __/___ ______   /_  __/___  ___ \n  / / / / ___/    / / / __ `/ ___/    / / / __ \\/ _ \\\n / / / / /__     / / / /_/ / /__     / / / /_/ /  __/\n/_/ /_/\\___/    /_/  \\__,_/\\___/    /_/  \\____/\\___/ \n                                                     \n')
 
 
-def print_board():
-    """Prints the current state of the board using X's and O's."""
+def print_board(brd):
+    """Prints the current state of the board using X's and O's.
+
+    Args:
+        brd (numpy.array): A 3x3 numpy array containing the board data.
+    """
     print_title()
-    board_str = "+---+---+---+\n"
-    for row in board:
+    brd_str = "+---+---+---+\n"
+    for row in brd:
         for i in range(3):
-            board_str += f"| {' XO'[row[i]]} "
-        board_str += "|\n+---+---+---+\n"
+            brd_str += f"| {' XO'[row[i]]} "
+        brd_str += "|\n+---+---+---+\n"
         # +----------------------+-------------------------+
         # | ^ left-aligned board | \/ center-aligned board |
         # +----------------------+-------------------------+
@@ -37,7 +33,7 @@ def print_board():
         # row_str += "|"
         # board_str += row_str.center(53) + "\n" + \
         #     "+---+---+---+".center(53) + "\n"
-    print(board_str)
+    print(brd_str)
 
 
 def check_win(brd):
@@ -182,6 +178,7 @@ def rand_move(brd):
 
 
 def main():
+
     mode = 0
     while not(mode in (1, 2, 3, 4)):
         print_title()
@@ -190,9 +187,16 @@ def main():
                 "Choose a mode to play\n1. Player vs. AI (easy)\n2. Player vs. AI (medium)\n3. Player vs. AI (hard)\n4. Player vs. AI (insane) \n5. Player vs. Player\n\n> "))
         except ValueError:
             input("Please enter 1/2/3/4")
+    board = np.array(
+        [[0, 0, 0],
+         [0, 0, 0],
+         [0, 0, 0]
+         ]
+    )
+    win = 0
     turn = 1
     while not(win := check_win(board)):
-        print_board()
+        print_board(board)
         if turn == 1 or mode == 5:
             try:
                 usr_in = int(
@@ -230,7 +234,7 @@ def main():
             turn = 1
             time.sleep(0.5)
     print_title()
-    print_board()
+    print_board(board)
     if win > 0:
         print(f"{' XO'[win]} wins!")
     else:
