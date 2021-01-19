@@ -1,6 +1,5 @@
 import numpy as np
 import os
-import random
 import time
 
 board = np.array(
@@ -177,7 +176,7 @@ def pot_side(brd):
 
 def rand_move(brd):
     while True:
-        ai_row, ai_col = random.randint(0, 2), random.randint(0, 2)
+        ai_row, ai_col = np.random.randint(3, size=2)
         if brd[ai_row, ai_col] == 0:
             return (ai_row, ai_col)
 
