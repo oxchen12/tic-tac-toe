@@ -56,10 +56,10 @@ def check_win(brd):
         row = brd[i]
         col = brd[:, i]
         # check horizontals
-        if not(sum(row) % 3) and row[0]:
+        if (row[0] == row[1] == row[2]) and row[0]:
             return row[0]
         # check verticals
-        if not(sum(col) % 3) and col[0]:
+        if (col[0] == col[1] == col[2]) and col[0]:
             return col[0]
     # check diagonals
     if (brd[0, 0] == brd[1, 1] == brd[2, 2] or brd[2, 0] == brd[1, 1] == brd[0, 2]) and brd[1, 1]:
